@@ -28,6 +28,17 @@ AppDock.at365 **v0.3.0以降**が必要です。`publish/Applet.Watch.at365` の
 .\scripts\install-local.ps1 -AppDockDirectory 'C:\Tools\AppDock.at365'
 ```
 
+同じ操作はプロジェクト直下のバッチからも実行できます。
+
+```bat
+publish.bat
+deploy.bat
+rem 別のAppDock配置先へ
+deploy.bat "C:\Tools\AppDock.at365"
+```
+
+`deploy.local.txt` にAppDock本体があるフォルダーの絶対パスを1行で保存しておけば、引数なしの `deploy.bat` でもその配置先を使えます。明示的な引数がある場合はそちらが優先され、ファイルがない場合は既存の既定配置先を使います。
+
 AppDockを起動し直し、「Applet」で **Applet.Watch.at365** を有効にすると時計が表示されます。新しく追加したAppletは既定では無効です。
 
 「設定 → Applet設定 → Applet.Watch.at365」で、表示状態・モニター・上端／下端・左右／上下の余白・文字サイズ・不透明度・秒／日付表示を編集し、「保存」してください。変更は再起動なしで反映されます。
@@ -40,7 +51,7 @@ AppDockを起動し直し、「Applet」で **Applet.Watch.at365** を有効に�
 | 時計を非表示 | `at365.watch.hide` |
 | 時計の表示を切り替え | `at365.watch.toggle` |
 
-Ctrl+PのコマンドパレットとApplet画面のボタンから実行できます。「設定 → ショートカット」でキーを割り当てたり、パレットでピン留めしたりできます。AppDockのショートカットはAppDock操作中に有効です。時計用のグローバルキーは登録しません。
+Ctrl+PのコマンドパレットとApplet画面のボタンから実行できます。AppDock **v0.3.1以降**では、`at365.watch.toggle` の既定キーは **Pause** です。Applet有効時は、ほかのアプリを操作中やAppDockのトレイ格納中にも時計の表示を切り替えられます。「設定 → ショートカット」でキーと「グローバル」を変更できます。ホットキーの登録・競合表示・解除はAppDockが担当します。元のWatchがPauseを使用している場合は、元Watchを終了するか割り当てを変更してください。既存の明示的なキー設定は保持されます。
 
 表示／非表示コマンドで変更した状態も、AppDockの `settings.json` の `extensions.at365.watch.settings.visible` に保存します。Applet専用の設定ファイルは作りません。アバター等のホスト設定にも触れません。
 
