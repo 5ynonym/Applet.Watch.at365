@@ -77,3 +77,7 @@ node .\scripts\test-ui.cjs ..\AppDock.at365\publish\win-unpacked\AppDock.at365.e
 実画面テストは隣のAppDockプロジェクトのPlaywrightとElectronを利用し、Appletの `artifacts` 内の専用設定で動作します。実利用の設定、元Watchのプロセス、マウス・クリップボード・ロック状態を操作しません。`APPDOCK_WATCH_TEST_OUTPUT` はテスト時だけ、時計自身の描画とウィンドウ状態を検証用フォルダーへ出す環境変数です。
 
 フォントとアイコンは `Watch.at365/Watch` の既存リソースを複製して同梱しています。公開配布は行っていません。
+
+## v0.1.1 のバージョン確認
+
+AppDock v0.5.0では共通の「開始までの秒数」で遅延起動でき、手動の「更新を確認」でGitHubの正式リリースを確認できます。manifestに必要なAppDockの最小バージョンと更新確認先を記録しています。
