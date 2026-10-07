@@ -17,17 +17,15 @@ dotnet run --project Applet.Watch.RegressionTests -c Release
 
 `publish.bat`の第1引数には任意の発行先、`deploy.bat`の第1引数にはAppDock.at365.exeがあるフォルダーを指定できます。配置先は引数、`deploy.local.txt`の先頭行、PowerShellスクリプトの既定値の順です。実利用先への配置時はAppDockを完全終了してください。
 
-発行物は`publish/Applet.Watch.at365/`に生成します。配置に必要なファイルは次の4つです。
+発行物は`publish/Applet.Watch.at365/`に生成します。配置に必要なファイルは次の2つです。
 
 ```text
 extensions/Applet.Watch.at365/
 ├─ extension.json
-├─ Applet.Watch.at365.dll
-├─ Applet.Watch.at365.deps.json
-└─ Resources/Hatten.ttf
+└─ Applet.Watch.at365.exe
 ```
 
-DLLはAppDockの既存.NETホストがロードします。Applet自身のEXE・WPF・同梱.NETランタイムは不要です。発行・配置スクリプトは旧Watch EXEだけを除去して、DLL形式に更新します。独自ウィンドウを必要とするほかのAppletは引き続きnative EXEを使えます。
+AppletはWPFで時計を描画するself-contained単一EXEです。AppDockはAppletの起動・停止・設定・コマンドを管理し、時計の描画、透過、クリック透過、モニター配置はApplet自身が担当します。配布先PCに.NETランタイムは不要です。
 
 ## 検証
 
@@ -36,9 +34,9 @@ node scripts/test-ui.cjs
 node scripts/test-ui.cjs ../AppDock.at365/publish/win-unpacked/AppDock.at365.exe
 ```
 
-UIテストはAppDockのウィジェット検証を実行し、隔離profileにこのDLLを配置します。グローバルNodeは不要で、ホストの`.tools/node/24.21.0/node.exe`でも実行できます。実利用のAppDock設定、元Watchのプロセス、壁紙、マウス位置を変更しません。検証範囲と未確認項目は[VERIFICATION.md](VERIFICATION.md)を参照してください。
+UIテストは隔離profileへApplet EXEを配置し、時計の描画・設定反映・コマンド・終了を検証します。グローバルNodeは不要で、ホストの`.tools/node/24.21.0/node.exe`でも実行できます。実利用のAppDock設定、元Watchのプロセス、壁紙、マウス位置を変更しません。検証範囲と未確認項目は[VERIFICATION.md](VERIFICATION.md)を参照してください。
 
-ウィジェットSDKとホストの構造は[AppDockのウィジェット開発ガイド](../AppDock.at365/docs/widgets.md)に記載しています。
+Appletのnative実装とホストとの接続は、[AppDockのApplet実装ガイド](../AppDock.at365/docs/applet-development.md)を参照してください。
 
 ## 文書の更新
 
