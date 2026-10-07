@@ -1,61 +1,56 @@
-using System.Windows.Threading;
 using AppDock.SDK;
-using Microsoft.Win32;
 
 namespace Applets.Watch;
 
-internal sealed class ClockApplet(Dispatcher dispatcher) : IAppDockExtension
+public sealed class ClockApplet : IAppDockExtension
 {
     private IExtensionContext? context;
-    private ClockWindow? clock;
     private IDisposable? settingsSubscription;
     public async Task ActivateAsync(IExtensionContext services, CancellationToken cancellationToken)
     {
         context = services;
-        await dispatcher.InvokeAsync(() => { clock = new ClockWindow(); clock.Apply(ClockOptions.Read(services.Settings)); });
-        await PublishMonitorsAsync(cancellationToken);
-        services.Commands.Register(services.ExtensionId + ".show", "時計を表示", token => SetVisibleAsync(true, token));
-        services.Commands.Register(services.ExtensionId + ".hide", "時計を非表示", token => SetVisibleAsync(false, token));
-        services.Commands.Register(services.ExtensionId + ".toggle", "時計の表示を切り替え", token => SetVisibleAsync(!services.Settings.Get("visible", true), token));
-        settingsSubscription = services.Settings.OnChanged(ApplyAsync);
-        SystemEvents.DisplaySettingsChanged += DisplayChanged;
-        await PublishStateAsync(cancellationToken);
+        await PublishAsync(cancellationToken);
+        services.Commands.Register(services.ExtensionId + ".show", "時計と日付を表示", token => SetVisibleAsync(true, token));
+        services.Commands.Register(services.ExtensionId + ".hide", "時計と日付を非表示", token => SetVisibleAsync(false, token));
+        services.Commands.Register(services.ExtensionId + ".toggle", "時計と日付の表示を切り替え", ToggleAsync);
+        settingsSubscription = services.Settings.OnChanged(PublishAsync);
+    }
+    private async Task ToggleAsync(CancellationToken token)
+    {
+        var services = context ?? throw new InvalidOperationException("Appletは停止しています。");
+        var placements = await services.Widgets.GetPlacementsAsync(token);
+        await SetVisibleAsync(!placements.Values.Any(p => p.Desktop), token);
     }
     private async Task SetVisibleAsync(bool visible, CancellationToken token)
     {
         var services = context ?? throw new InvalidOperationException("Appletは停止しています。");
+        await services.Widgets.SetDesktopAsync([services.ExtensionId + ".clock", services.ExtensionId + ".date"], visible, token);
         await services.Settings.SetAsync("visible", visible, token);
-        await ApplyAsync(token);
     }
-    private async Task ApplyAsync(CancellationToken token)
+    internal static WidgetDefinition[] Definitions(string id, ClockOptions options)
+    {
+        var bottom = options.Alignment == "bottom";
+        return [
+            new(id + ".clock", "時計", new("clock") { ShowSeconds = options.ShowSeconds, Locale = "en-GB" }) {
+                Description = "時・分・秒。ホームと透過デスクトップで共通の時計を表示します。", FontFile = "Resources/Hatten.ttf",
+                InitialPlacement = new() { Desktop = options.Visible, Monitor = options.Monitor, Anchor = bottom ? "bottom-left" : "top-left", X = options.HorizontalMargin, Y = options.VerticalMargin, Width = Math.Clamp(options.FontSize * 2.5, 120, 7680), Height = Math.Max(60, options.FontSize), FontSize = options.FontSize, Opacity = options.Opacity }
+            },
+            new(id + ".date", "日付", new("date") { Locale = "en-US" }) {
+                Description = "月日と曜日。時計とは独立してピン留めや配置を変更できます。", FontFile = "Resources/Hatten.ttf",
+                InitialPlacement = new() { Desktop = options.Visible && options.ShowDate, Order = 1, Monitor = options.Monitor, Anchor = bottom ? "bottom-right" : "top-right", X = options.HorizontalMargin, Y = options.VerticalMargin, Width = Math.Clamp(options.FontSize * 1.7, 120, 7680), Height = Math.Max(60, options.FontSize / 2), FontSize = Math.Max(12, options.FontSize / 2), Opacity = options.Opacity }
+            }
+        ];
+    }
+    private async Task PublishAsync(CancellationToken token)
     {
         if (context is null) return;
-        var options = ClockOptions.Read(context.Settings);
-        await dispatcher.InvokeAsync(() => clock?.Apply(options));
-        await PublishStateAsync(token);
+        await context.Widgets.ReplaceAsync(Definitions(context.ExtensionId, ClockOptions.Read(context.Settings)), token);
+        await context.Ui.ShowPanelAsync(new("時計と日付のウィジェット", "ホームへのピン留め・デスクトップの表示場所・前後関係は、AppDockのウィジェットページで設定できます。", Actions: [
+            new("デスクトップに表示", context.ExtensionId + ".show"), new("デスクトップから非表示", context.ExtensionId + ".hide"), new("表示を切り替え", context.ExtensionId + ".toggle")]), token);
     }
-    private async Task PublishMonitorsAsync(CancellationToken token)
+    public Task DeactivateAsync(CancellationToken cancellationToken)
     {
-        if (context is null) return;
-        var options = await dispatcher.InvokeAsync(ClockWindow.MonitorOptions);
-        await context.Settings.SetOptionsAsync("monitor", options, token);
-    }
-    private async Task PublishStateAsync(CancellationToken token)
-    {
-        if (context is null || clock is null) return;
-        var panel = await dispatcher.InvokeAsync(() => clock.StatePanel(context.ExtensionId));
-        await context.Ui.ShowPanelAsync(panel, token);
-    }
-    private async void DisplayChanged(object? sender, EventArgs e)
-    {
-        try { await PublishMonitorsAsync(CancellationToken.None); await ApplyAsync(CancellationToken.None); }
-        catch (Exception error) { Console.Error.WriteLine(error); }
-    }
-    public async Task DeactivateAsync(CancellationToken cancellationToken)
-    {
-        SystemEvents.DisplaySettingsChanged -= DisplayChanged;
-        settingsSubscription?.Dispose();
-        context = null;
-        await dispatcher.InvokeAsync(() => { clock?.Close(); clock = null; });
+        settingsSubscription?.Dispose(); settingsSubscription = null; context = null;
+        return Task.CompletedTask;
     }
 }

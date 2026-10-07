@@ -6,6 +6,7 @@
   <ItemGroup>
     <Compile Include="../Applet.Watch/ClockOptions.cs" Link="ClockOptions.cs" />
     <Compile Include="../Applet.Watch/ClockLayout.cs" Link="ClockLayout.cs" />
+    <Compile Include="../Applet.Watch/ClockApplet.cs" Link="ClockApplet.cs" />
     <ProjectReference Include="../../AppDock.at365/dotnet/AppDock.SDK/AppDock.SDK.csproj" />
   </ItemGroup>
 </Project>
