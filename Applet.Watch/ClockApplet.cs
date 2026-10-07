@@ -31,11 +31,11 @@ public sealed class ClockApplet : IAppDockExtension
     {
         var bottom = options.Alignment == "bottom";
         return [
-            new(id + ".clock", "時計", new("clock") { ShowSeconds = options.ShowSeconds, Locale = "en-GB" }) {
+            new(id + ".clock", "時計", new("clock") { ShowSeconds = options.ShowSeconds, LetterSpacing = options.LetterSpacing, Locale = "en-GB" }) {
                 Description = "時・分・秒。ホームと透過デスクトップで共通の時計を表示します。", FontFile = "Resources/Hatten.ttf",
                 InitialPlacement = new() { Desktop = options.Visible, Monitor = options.Monitor, Anchor = bottom ? "bottom-left" : "top-left", X = options.HorizontalMargin, Y = options.VerticalMargin, Width = Math.Clamp(options.FontSize * 2.5, 120, 7680), Height = Math.Max(60, options.FontSize), FontSize = options.FontSize, Opacity = options.Opacity }
             },
-            new(id + ".date", "日付", new("date") { Locale = "en-US" }) {
+            new(id + ".date", "日付", new("date") { LetterSpacing = options.LetterSpacing, Locale = "en-US" }) {
                 Description = "月日と曜日。時計とは独立してピン留めや配置を変更できます。", FontFile = "Resources/Hatten.ttf",
                 InitialPlacement = new() { Desktop = options.Visible && options.ShowDate, Order = 1, Monitor = options.Monitor, Anchor = bottom ? "bottom-right" : "top-right", X = options.HorizontalMargin, Y = options.VerticalMargin, Width = Math.Clamp(options.FontSize * 1.7, 120, 7680), Height = Math.Max(60, options.FontSize / 2), FontSize = Math.Max(12, options.FontSize / 2), Opacity = options.Opacity }
             }

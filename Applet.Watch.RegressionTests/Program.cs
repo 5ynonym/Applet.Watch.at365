@@ -14,7 +14,7 @@ Check("top margin converts DIP to physical pixels", () => Equal(new PixelBounds(
 Check("bottom placement respects monitor origin and DPI", () => Equal(new PixelBounds(-1920, 375, 1920, 300), ClockLayout.Place(left, 200, 1.5, new(Alignment: "bottom", VerticalMargin: 30))));
 Check("oversized clock is clipped to the selected monitor", () => Equal(new PixelBounds(-1920, -360, 1920, 1080), ClockLayout.Place(left, 3000, 2, new(Alignment: "bottom", VerticalMargin: 1000))));
 Check("excessive margins keep the window in the screen", () => Equal(1140, ClockLayout.Place(primary, 300, 1, new(VerticalMargin: 10000)).Top));
-Check("manual invalid settings remain safe", () => { var options = new ClockOptions(Alignment: "invalid", FontSize: double.NaN, Opacity: 20, HorizontalMargin: -100, VerticalMargin: double.PositiveInfinity).Normalize(); Equal("top", options.Alignment); Equal(420d, options.FontSize); Equal(1d, options.Opacity); Equal(0d, options.HorizontalMargin); Equal(0d, options.VerticalMargin); });
+Check("manual invalid settings remain safe", () => { var options = new ClockOptions(Alignment: "invalid", FontSize: double.NaN, Opacity: 20, HorizontalMargin: -100, VerticalMargin: double.PositiveInfinity, LetterSpacing: double.PositiveInfinity).Normalize(); Equal("top", options.Alignment); Equal(420d, options.FontSize); Equal(1d, options.Opacity); Equal(0d, options.HorizontalMargin); Equal(0d, options.VerticalMargin); Equal(0d, options.LetterSpacing); });
 Check("legacy visibility, bottom anchor and opacity seed independent widgets", () => {
     var widgets = ClockApplet.Definitions("at365.watch", new(Visible: false, Alignment: "bottom", Opacity: 0.25));
     Equal("at365.watch.clock", widgets[0].Id); Equal("at365.watch.date", widgets[1].Id);
@@ -24,6 +24,10 @@ Check("legacy visibility, bottom anchor and opacity seed independent widgets", (
 Check("legacy date and seconds opt-outs carry into widget definitions", () => {
     var widgets = ClockApplet.Definitions("at365.watch", new(ShowDate: false, ShowSeconds: false));
     Equal(false, widgets[0].Content.ShowSeconds); Equal(true, widgets[0].InitialPlacement!.Desktop); Equal(false, widgets[1].InitialPlacement!.Desktop);
+});
+Check("character spacing carries into both widget definitions", () => {
+    var widgets = ClockApplet.Definitions("at365.watch", new(LetterSpacing: 24));
+    Equal(24d, widgets[0].Content.LetterSpacing); Equal(24d, widgets[1].Content.LetterSpacing);
 });
 var services = new TestServices();
 var applet = new ClockApplet();

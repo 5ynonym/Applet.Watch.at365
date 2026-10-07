@@ -3,8 +3,8 @@
   "id": "at365.watch",
   "name": "Applet.Watch.at365",
   "displayName": "Watch.at365",
-  "version": "0.2.0",
-  "minimumHostVersion": "0.10.0",
+  "version": "0.3.0",
+  "minimumHostVersion": "0.15.0",
   "updateRepository": "5ynonym/Applet.Watch.at365",
   "runtime": "dotnet",
   "entry": "Applet.Watch.at365.dll",
@@ -17,6 +17,16 @@
       "type": "boolean",
       "default": true,
       "description": "時・分の隣に秒を表示します。"
+    },
+    {
+      "key": "letterSpacing",
+      "title": "文字間隔（px）",
+      "type": "number",
+      "default": 0,
+      "minimum": 0,
+      "maximum": 100,
+      "step": 1,
+      "description": "時計と日付の文字間を広げます。"
     }
   ],
   "type": "Applets.Watch.ClockApplet",
