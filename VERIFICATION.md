@@ -27,19 +27,3 @@ SHA256: `08808ACC84CF3F725F63E7C2AD0E71247FD36BD4F43F765A691DC0492B59397F`。
 埋め込みHatten.ttfは元WatchとSHA256一致: `40E898E471FA4DE3CA09A6DFED961D00D6395AF20FE6CF1C6B83C795BEA04543`。
 
 開発版UI記録は `artifacts/ui-1791209433885/`、ビルド済みAppDockの最終UI記録は `artifacts/ui-1791210165097/`。テストごとに専用フォルダーのsettings.jsonを使い、`clock-state.json`、時計・Applet画面・設定画面のPNGを残します。ホスト側portable接続記録は `../AppDock.at365/artifacts/smoke-1791209958264/smoke-result.json`。
-## 2026-10-07: v0.2.0 ウィジェット/DLL化
-
-- AppDock 0.10.0のIWidgetServiceを使用し、時計と日付を別IDで提供。独自WPFウィンドウ・EXE・Appletタイマーを除去。元のHatten.ttfをファイル同梱し、AppDockの共通描画へ移行。
-- Release DLL build/publish成功、警告0・エラー0。`publish.bat`成功。既存の配置計算8件に移行・秒/日付opt-out・表示切替/配置保持・設定購読解放6件を加え、14/14成功。
-- ホストの開発版/発行版隔離UIで、DLL実通信、初回の旧設定取り込み、保存配置の再登録/再起動後の保持、ホーム/デスクトップの独立性、秒更新、元フォント、2画面の独立配置（前面・背面）、共有透過画面、表示/非表示/Pauseと同じtoggle処理、Applet停止と再有効化を確認。管理ページ、ライト/ダーク、900pxのPNGを確認。
-- 最終開発版: `../AppDock.at365/artifacts/widgets-ui-1791331213323`。最終win-unpacked版: `../AppDock.at365/artifacts/widgets-ui-1791331254254`。単一EXE+DLL smoke: `../AppDock.at365/artifacts/smoke-1791331259893/smoke-result.json`（ok=true）。
-- 成果物: `publish/Applet.Watch.at365/Applet.Watch.at365.dll`、26,112 bytes、SHA256 `8CD9609C093965C55BBA7FB09B9D5A8D294C08DD10C9A1DEECE6AA71EA6F5466`。必要な配布ファイルはDLL、deps.json、extension.json、Resources/Hatten.ttf。フォントのSHA256は旧版と一致する`40E898E471FA4DE3CA09A6DFED961D00D6395AF20FE6CF1C6B83C795BEA04543`。
-- プロジェクトのAppDock publish/extensionsへ配置し、4ファイルのハッシュ一致と旧EXE除去を確認。実利用先・元Watch・壁紙・マウス位置は変更していない。外部公開/pushなし。
-- 物理マウスでのドラッグ/下側ウィンドウ操作、異なるDPI、実モニター着脱、Explorer強制再起動、RDP、実スリープ復帰、長期常駐は未確認。移動保存/取消は専用ウィンドウの座標をプログラムから変更して、実画面の完了/取消ボタンで検証。
-
-冒頭の0.1.x検証記録は旧WPF/単一EXE版の履歴です。現在の成果物・検証範囲はこのv0.2.0節を参照してください。
-
-## 2026-10-07: ウィジェット用ブランチのmain統合
-
-- ユーザーの正常動作確認とマージ指示を受け、`codex/widgets`（90b3e2e）を`main`へfast-forwardで統合。マージ前後のGit tree一致を確認し、検証済みWatch 0.2.0のコードは変更していない。
-- AppDock側も0.10.2のウィジェット対応をmainへ統合し、今回のデプロイで退避した旧ホストEXEを指示どおり削除。両リポジトリのマージ済み`codex/widgets`を削除。外部公開/pushなし。
