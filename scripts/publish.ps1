@@ -1,4 +1,4 @@
-param([string]$OutputDirectory)
+﻿param([string]$OutputDirectory)
 $ErrorActionPreference = 'Stop'
 $taskAppletRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $taskPublishDirectory = if ($OutputDirectory) { [System.IO.Path]::GetFullPath($OutputDirectory) } else { Join-Path $taskAppletRoot 'publish\Applet.Watch.at365' }
@@ -10,3 +10,12 @@ foreach ($taskSymbols in @('AppDock.Runtime.pdb', 'AppDock.SDK.pdb')) {
     if (Test-Path -LiteralPath $taskSymbolFile -PathType Leaf) { Remove-Item -LiteralPath $taskSymbolFile }
 }
 Write-Output "Applet output: $taskPublishDirectory"
+
+# Match the existing deploy payload; remove obsolete build outputs before creating the ZIP.
+foreach ($taskOldName in @('AppDock.SDK.dll', 'AppDock.SDK.pdb', 'AppDock.Runtime.dll', 'Applet.Watch.at365.dll', 'Applet.Watch.at365.deps.json', 'Applet.Watch.at365.runtimeconfig.json', 'Applet.Watch.at365.pdb', 'Resources\Hatten.ttf')) {
+    $taskOldFile = Join-Path $taskPublishDirectory $taskOldName
+    if (Test-Path -LiteralPath $taskOldFile -PathType Leaf) { Remove-Item -LiteralPath $taskOldFile }
+}
+
+$taskUpdateHostRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..\AppDock.at365'))
+& (Join-Path $taskUpdateHostRoot 'scripts\pack-applet-update.ps1') -SourceDirectory $taskPublishDirectory -OutputDirectory (Join-Path (Split-Path $PSScriptRoot -Parent) 'publish')
