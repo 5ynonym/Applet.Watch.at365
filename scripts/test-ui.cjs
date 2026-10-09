@@ -9,7 +9,7 @@ const packagedExecutable = process.argv[2]
 const { _electron: electron } = require(
   path.join(host, "node_modules/playwright"),
 );
-const profile = path.join(root, "artifacts", `ui-${Date.now()}`);
+const profile = path.join(root, ".artifacts", `ui-${Date.now()}`);
 const probe = path.join(profile, "clock");
 const folder = path.join(profile, "extensions/Applet.Watch.at365");
 fs.mkdirSync(folder, { recursive: true });
