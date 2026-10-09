@@ -40,7 +40,7 @@ Windows x64とAppDock.at365 **v0.3.0以降**が必要です。現行のAppDock�
 | 時計を非表示 | `at365.watch.hide` |
 | 時計の表示を切り替え | `at365.watch.toggle` |
 
-Ctrl+PのコマンドパレットとApplet画面のボタンから実行できます。AppDock v0.3.1以降では、`at365.watch.toggle`の既定キーはPauseです。キーとグローバル登録は「設定 → ショートカット」から変更できます。
+Ctrl+PのコマンドパレットとApplet画面のボタンから実行できます。AppDock 0.25.2以降では、新規導入時に`at365.watch.toggle`へグローバルPauseを割り当てます。キーと条件は「設定 → ショートカット」から変更できます。
 
 ---
 

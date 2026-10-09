@@ -3,13 +3,21 @@
   "id": "at365.watch",
   "name": "Applet.Watch.at365",
   "displayName": "Watch.at365",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "minimumHostVersion": "0.3.0",
   "updateRepository": "5ynonym/Applet.Watch.at365",
   "runtime": "native",
   "entry": "Applet.Watch.at365.exe",
   "description": "デスクトップに半透明の時計を表示します。モニターと位置をAppDockから設定できます。",
   "capabilities": ["ui", "settings"],
+  "commands": [
+    { "id": "at365.watch.show", "title": "時計を表示" },
+    { "id": "at365.watch.hide", "title": "時計を非表示" },
+    { "id": "at365.watch.toggle", "title": "時計の表示を切り替え" }
+  ],
+  "defaultKeybindings": [
+    { "command": "at365.watch.toggle", "key": "Pause", "enabled": true, "when": { "scope": "global", "appletIds": [] } }
+  ],
   "settings": [
     {
       "key": "visible",

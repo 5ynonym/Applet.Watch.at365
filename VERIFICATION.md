@@ -1,5 +1,10 @@
 # 検証記録
 
+## 2026-10-09: v0.1.2 ショートカット初期値
+
+- 既存の実行時登録と同じ3コマンドをmanifestへ宣言し、時計切替のグローバルPauseを`defaultKeybindings`へ追加。AppDock本体のWatch固有既定値は除去。Appletの実行コードは変更なし。
+- 最初の並列`publish.bat`はWPF生成ファイルの競合で終了1、単独再実行は終了0。`publish/update.json`はid `at365.watch`/版0.1.2、最終`update.zip`は69922837 bytes/SHA256 `8928ba1d5155d9af8c1b2ed8e47791b410df090ec0f242b2b0a65c545344de96`。AppDock 0.25.2の全体ZIPに同梱し、隔離起動後のsettingsでPause/global条件を確認。実時計表示・実利用先deploy・個別GitHub公開は未実施。
+
 ## 2026-10-09: 更新配布物の自動生成
 
 - `codex/update-packages`で発行スクリプトだけを更新。Applet本体の版は0.1.1を維持し、`publish.bat`終了コード0。共通パッカーはAppDock 0.23.0のソースから発行。
