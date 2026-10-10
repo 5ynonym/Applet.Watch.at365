@@ -23,6 +23,16 @@ const { createDefaultSettings } = require(
 );
 const config = createDefaultSettings();
 config.host.notifications = false;
+config.extensions["at365.watch"] = { enabled: true, settings: {} };
+config.keybindings = [
+  {
+    id: "test-clock-toggle",
+    command: "at365.watch.settings.visible.toggle",
+    key: "Ctrl+Alt+F11",
+    enabled: true,
+    when: { scope: "app", appletIds: [] },
+  },
+];
 fs.writeFileSync(path.join(profile, "settings.json"), JSON.stringify(config));
 let application;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -65,34 +75,36 @@ async function launch() {
     timeout: 30000,
   });
   const page = await application.firstWindow();
-  await page.getByRole("heading", { name: "Welcome to your Dock." }).waitFor();
+  await page.getByRole("heading", { name: "ホーム" }).waitFor();
   return page;
 }
 async function command(page, id) {
-  await page.keyboard.press("Control+p");
+  await page
+    .getByRole("button", { name: "コマンドを検索", exact: false })
+    .first()
+    .click();
+  await page
+    .getByRole("combobox", { name: "コマンドを検索" })
+    .fill("at365.watch." + id);
   await page
     .locator(`[data-command-id="at365.watch.${id}"] .palette-execute`)
     .click();
-  await page
-    .getByRole("status")
-    .filter({ hasText: "コマンドを実行" })
-    .waitFor();
 }
 async function save(page) {
-  await page.getByRole("button", { name: "保存", exact: true }).click();
-  await page.getByText("すべて保存されています", { exact: true }).waitFor();
+  await page
+    .getByRole("button", { name: "変更をすべて保存", exact: true })
+    .click();
+  await page.waitForFunction(() =>
+    window.dock.snapshot().then((s) => !s.settings.syncError),
+  );
 }
 (async () => {
   try {
     let page = await launch();
+    await page.getByRole("button", { name: "Applet", exact: true }).click();
     await page
-      .getByRole("button", { name: "Appletを管理", exact: true })
-      .click();
-    await page
-      .getByRole("button", { name: "Applet.Watch.at365 C# / .NET 10" })
-      .click();
-    await page
-      .getByRole("switch", { name: "Applet.Watch.at365を有効にする" })
+      .getByRole("button", { name: "Watch.at365", exact: false })
+      .first()
       .click();
     await page.getByRole("heading", { name: "Your desktop clock." }).waitFor();
     const initial = await until(
@@ -121,17 +133,22 @@ async function save(page) {
     }, "Clock capture stayed locked");
     const snap = await page.evaluate(() => window.dock.snapshot());
     const applet = snap.extensions.find((e) => e.id === "at365.watch");
-    assert.equal(applet.commands.length, 3);
+    assert.equal(applet.commands.length, 9);
+    assert(
+      !applet.commands.some(
+        (c) =>
+          /\.(show|hide|toggle)$/.test(c.id) && !c.id.includes(".settings."),
+      ),
+    );
     assert.deepEqual(applet.tray, []);
     await page.screenshot({ path: path.join(profile, "applet.png") });
-    await command(page, "hide");
+    await command(page, "settings.visible.off");
     await until(() => !state().visible, "Hide did not apply");
     assert.equal(saved().visible, false);
-    await command(page, "show");
+    await command(page, "settings.visible.on");
     await until(() => state().visible, "Show did not apply");
     assert.equal(saved().visible, true);
-    await page.keyboard.press("Control+,");
-    await page.getByRole("button", { name: "Applet設定", exact: true }).click();
+    await page.getByRole("tab", { name: "設定", exact: true }).click();
     await page.getByLabel("時計の位置", { exact: true }).selectOption("bottom");
     await page.getByLabel("時計の文字サイズ", { exact: true }).fill("120");
     await page.getByLabel("時計の不透明度", { exact: true }).fill("0.65");
@@ -170,27 +187,69 @@ async function save(page) {
       assert.equal(current.width, current.monitor.Width);
     }
     await page.getByLabel("時計の不透明度", { exact: true }).fill("2");
-    await page.getByRole("button", { name: "保存", exact: true }).click();
+    await page
+      .getByRole("button", { name: "変更をすべて保存", exact: true })
+      .click();
     await page.getByRole("alert").filter({ hasText: "不透明度" }).waitFor();
     assert.equal(saved().opacity, 0.65);
-    await page.getByRole("button", { name: "再読み込み", exact: true }).click();
     await page
-      .getByRole("heading", { name: "Applet.Watch.at365", exact: true })
-      .evaluate((element) => element.scrollIntoView({ block: "start" }));
-    await page.screenshot({ path: path.join(profile, "settings.png") });
-    await page
-      .getByRole("button", { name: "ショートカット", exact: true })
+      .getByRole("button", { name: "変更を破棄して再読み込み", exact: true })
       .click();
-    await page
-      .getByLabel("時計の表示を切り替えのショートカット 1", { exact: true })
-      .press("Control+Alt+w");
-    await save(page);
+    await page.screenshot({ path: path.join(profile, "settings.png") });
+    await require("./settings-mcp-check.cjs")({
+      host,
+      profile,
+      page,
+      id: "at365.watch",
+      keys: [
+        "visible",
+        "alignment",
+        "horizontalMargin",
+        "verticalMargin",
+        "fontSize",
+        "opacity",
+        "showSeconds",
+        "showDate",
+      ],
+      changes: {
+        visible: true,
+        alignment: "top",
+        horizontalMargin: 22,
+        verticalMargin: 12,
+        fontSize: 160,
+        opacity: 0.55,
+        showSeconds: true,
+        showDate: true,
+      },
+      invalid: [
+        { opacity: 2, fontSize: 180 },
+        { alignment: "middle" },
+        { monitor: "primary" },
+      ],
+      hidden: ["monitor"],
+      switches: ["showSeconds", "showDate"],
+    });
+    await until(
+      () =>
+        state().opacity === 0.55 && !state().showSeconds && !state().showDate,
+      "MCP runtime settings did not apply",
+    );
+    assert.equal(state().processId, initial.processId);
+    assert.equal(
+      state().top,
+      state().monitor.Top + Math.round((12 * state().dpi) / 96),
+    );
+    const snapAfter = await page.evaluate(() => window.dock.snapshot());
+    assert.equal(
+      snapAfter.extensions.find((e) => e.id === "at365.watch").commands.length,
+      9,
+    );
     await page
       .getByRole("button", { name: "ホーム", exact: true })
       .first()
       .click();
-    await page.keyboard.press("Control+Alt+w");
-    await until(() => !state().visible, "Native shortcut did not hide");
+    await page.keyboard.press("Control+Alt+F11");
+    await until(() => !state().visible, "App shortcut did not hide");
     assert.equal(saved().visible, false);
     const pid = state().processId;
     await application.close();
@@ -202,7 +261,7 @@ async function save(page) {
       "Clock did not reconnect",
     );
     assert.equal(restored.visible, false);
-    assert.equal(restored.opacity, 0.65);
+    assert.equal(restored.opacity, 0.55);
     await page.waitForFunction(() =>
       window.dock
         .snapshot()
@@ -212,20 +271,26 @@ async function save(page) {
             "running",
         ),
     );
-    await page.keyboard.press("Control+p");
     await page
-      .locator('[data-command-id="at365.watch.toggle"] .palette-execute')
+      .getByRole("button", { name: "コマンドを検索", exact: false })
+      .first()
+      .click();
+    await page
+      .getByRole("combobox", { name: "コマンドを検索" })
+      .fill("at365.watch.settings.visible.toggle");
+    await page
+      .locator(
+        '[data-command-id="at365.watch.settings.visible.toggle"] .palette-execute',
+      )
       .waitFor();
     await page.keyboard.press("Escape");
-    await page.keyboard.press("Control+Alt+w");
+    await page.keyboard.press("Control+Alt+F11");
     await until(() => state().visible, "Restored shortcut did not show");
+    await page.getByRole("button", { name: "Applet", exact: true }).click();
     await page
-      .getByRole("button", { name: "Appletを管理", exact: true })
+      .getByRole("button", { name: "Watch.at365", exact: false })
       .click();
-    await page
-      .getByRole("button", { name: "Applet.Watch.at365 C# / .NET 10" })
-      .click();
-    await page.getByRole("button", { name: "再起動", exact: true }).click();
+    await page.evaluate(() => window.dock.restartExtension("at365.watch"));
     const restarted = await until(
       () => state().processId !== restored.processId && state(),
       "Applet did not restart",
@@ -234,12 +299,22 @@ async function save(page) {
       () => !alive(restored.processId),
       "Previous clock process survived restart",
     );
-    await page
-      .getByRole("switch", { name: "Applet.Watch.at365を有効にする" })
-      .click();
+    await page.evaluate(() =>
+      window.dock.toggleExtension("at365.watch", false),
+    );
     await until(
       () => !alive(restarted.processId),
       "Clock survived Applet disable",
+    );
+    fs.writeFileSync(
+      path.join(profile, "result.json"),
+      JSON.stringify({
+        ok: true,
+        packagedExecutable,
+        checks: [
+          "native clock / MCP public settings / generated switches / validation / permissions / persistence / lifecycle",
+        ],
+      }),
     );
     console.log(
       JSON.stringify(
@@ -250,10 +325,10 @@ async function save(page) {
           checks: [
             "native WPF rendering / embedded font / ticking",
             "click-through and no-activation styles / no taskbar or Applet tray",
-            "show / hide persistence",
+            "generated show / hide persistence; 8 public settings via MCP / exclusions / validation / permissions / revision / dryRun",
             "live settings / bottom placement / connected monitor selection",
             "numeric validation preserves settings",
-            "native command shortcuts / restart persistence",
+            "command keyboard shortcuts / restart persistence",
             "shutdown / restart / disable clean up clock process",
           ],
         },

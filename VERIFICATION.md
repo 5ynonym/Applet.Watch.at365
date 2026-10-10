@@ -1,5 +1,17 @@
 # 検証記録
 
+## 2026-10-11: 公開設定拡充のコミット前確認
+
+- stageしたtree `f7b2eaa4a2db83b64eda8888fd3c0a3a8fa85ca6`の標準回帰と発行ホスト/実AppletのGUI・MCPを再実行して成功。壁紙はRPC/発行native EXEも終了0。検証前後の製品・テスト・発行物hash不変を確認し、再発行なし。
+- 証跡は.artifacts/commit-validation-public-settings-20261011。完全ログ/終了コード/hash、対象tree/commit、兄弟ホストとツールの入力を記録。検証後の変更は本記録の追加のみで、最終treeを保存する。実サービス/実消灯・ロック/実デスクトップ壁紙は未操作。ローカルコミットまで。
+
+## 2026-10-11: 0.1.3 単純な設定の外部公開
+
+- 新規公開8項目: visible/alignment/horizontalMargin/verticalMargin/fontSize/opacity/showSeconds/showDate。動的monitorは非公開。boolean3項目から各ON/OFF/toggleを生成し、旧show/hide/toggleと専用ハンドラーを削除。パネルと初回Pause割当を新IDへ更新。既存割当の自動移行なし。
+- Release回帰8/8、publish終了0。発行Applet EXE＋発行AppDock 0.26.30で、実WPF描画/2モニター/透過・非アクティブ表示、GUI保存、MCP公開8項目・検証・非公開拒否・書込許可・dryRun・revision、生成スイッチ、画面内キー操作、再起動保持/停止を確認（ui-1791667822219）。物理グローバルキーは今回未試験。
+- 必要本体版0.26.30。自身のpublish/update.zipは69923996 bytes、SHA256 cf4414a53b74bc19df1619dd7f09d493a86b37a20e9db5637821b271724ffc64。manifest/feed/ZIP全2ファイルの内容一致を確認。未変更本体/Gmail等の再発行、依存更新、commit/push/Release/deployなし。
+- 証跡は.artifacts/public-settings-20261011。GUI試験を現行のApplet詳細タブ/保存操作へ更新し、試験用ポート固定・起動完了待ち・意図した拒否ログ・画像の縦横比の期待値を修正。途中失敗ログは保持し、最終試験は終了0。認証・実メール・実OS更新は対象外。古い成功profileは方式別で3件以下、その他の失敗/不明/再利用資料は保持し削除対象なし。
+
 ## 2026-10-10: 開発生成物を`.artifacts`へ改名
 
 - ユーザー指定でartifacts→.artifactsを改名。移動直後に既存751項目の相対パス/size/mtime/ディレクトリ・リンク属性が一致し、検証終了時も元の全項目のsize/mtime/属性が不変。配布物4ファイルのSHA256も検証前後で一致。保存済みログ/JSONは内部パスを含めて保持し、過去記録の当repoのartifacts/は.artifacts/へ読み替える。

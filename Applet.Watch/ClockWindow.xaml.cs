@@ -127,7 +127,7 @@ internal partial class ClockWindow : Window
             new("モニター", selected.Label + (options.Monitor != "primary" && selected.Id != options.Monitor ? "（未接続のためメインへ退避）" : "")),
             new("位置", options.Alignment == "bottom" ? "下端" : "上端"),
             new("座標", $"{rect.Left}, {rect.Top} · {rect.Right - rect.Left}×{rect.Bottom - rect.Top}")
-        ], [new("表示", commandPrefix + ".show"), new("非表示", commandPrefix + ".hide"), new("表示を切り替え", commandPrefix + ".toggle")]);
+        ], [new("表示", commandPrefix + ".settings.visible.on"), new("非表示", commandPrefix + ".settings.visible.off"), new("表示を切り替え", commandPrefix + ".settings.visible.toggle")]);
     }
     private void WriteTestSnapshot()
     {

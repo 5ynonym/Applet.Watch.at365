@@ -14,18 +14,9 @@ internal sealed class ClockApplet(Dispatcher dispatcher) : IAppDockExtension
         context = services;
         await dispatcher.InvokeAsync(() => { clock = new ClockWindow(); clock.Apply(ClockOptions.Read(services.Settings)); });
         await PublishMonitorsAsync(cancellationToken);
-        services.Commands.Register(services.ExtensionId + ".show", "時計を表示", token => SetVisibleAsync(true, token));
-        services.Commands.Register(services.ExtensionId + ".hide", "時計を非表示", token => SetVisibleAsync(false, token));
-        services.Commands.Register(services.ExtensionId + ".toggle", "時計の表示を切り替え", token => SetVisibleAsync(!services.Settings.Get("visible", true), token));
         settingsSubscription = services.Settings.OnChanged(ApplyAsync);
         SystemEvents.DisplaySettingsChanged += DisplayChanged;
         await PublishStateAsync(cancellationToken);
-    }
-    private async Task SetVisibleAsync(bool visible, CancellationToken token)
-    {
-        var services = context ?? throw new InvalidOperationException("Appletは停止しています。");
-        await services.Settings.SetAsync("visible", visible, token);
-        await ApplyAsync(token);
     }
     private async Task ApplyAsync(CancellationToken token)
     {
